@@ -1,10 +1,11 @@
 import gym
 
 from baselines import deepq
-
+MAX_TS = 1000000
 
 def main():
     env = gym.make("CartPole-v0")
+    env._max_episode_steps = MAX_TS
     act = deepq.learn(env, network='mlp', total_timesteps=0, load_path="cartpole_model.pkl")
 
     while True:
