@@ -190,13 +190,16 @@ def make_output_format(format, ev_dir, log_suffix=''):
 # API
 # ================================================================
 
-def logkv(key, val):
+def logkv(key, val,custom_path=None):
     """
     Log a value of some diagnostic
     Call this once for each diagnostic quantity, each iteration
     If called many times, last value will be used.
+    Note: custom_path was a custom add
+
     """
-    get_current().logkv(key, val)
+    get_current(custom_path).logkv(key, val)
+
 
 def logkv_mean(key, val):
     """
@@ -286,9 +289,9 @@ def profile(n):
 # Backend
 # ================================================================
 
-def get_current():
+def get_current(custom_path=None):
     if Logger.CURRENT is None:
-        _configure_default_logger()
+        _configure_default_logger(custom_path)
 
     return Logger.CURRENT
 
@@ -394,11 +397,13 @@ def configure(dir=None, format_strs=None, comm=None, log_suffix=''):
     output_formats = [make_output_format(f, dir, log_suffix) for f in format_strs]
 
     Logger.CURRENT = Logger(dir=dir, output_formats=output_formats, comm=comm)
+    print('Logger.CURRENT',Logger.CURRENT)
+
     if output_formats:
         log('Logging to %s'%dir)
 
-def _configure_default_logger():
-    configure()
+def _configure_default_logger(custom_path):
+    configure(dir=custom_path)
     Logger.DEFAULT = Logger.CURRENT
 
 def reset():
