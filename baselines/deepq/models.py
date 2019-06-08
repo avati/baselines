@@ -128,8 +128,7 @@ def build_qv_func(network, hiddens=[256], dueling=True, layer_norm=False, **netw
                     if layer_norm:
                         action_out = layers.layer_norm(action_out, center=True, scale=True)
                     action_out = tf.nn.relu(action_out)
-                action_scores = layers.fully_connected(action_out, num_outputs=num_actions, activation_fn=tf.exp)
-                v_out = action_scores
+                v_out = layers.fully_connected(action_out, num_outputs=num_actions, activation_fn=tf.exp)
 
             if dueling:
                 with tf.variable_scope("state_value"):
