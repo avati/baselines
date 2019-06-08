@@ -6,8 +6,8 @@ import tensorflow
 
 from baselines import deepq
 
-MAX_TS = 100000
-EXPLORE_TS = 10000.
+MAX_TS = 50000 #100000
+EXPLORE_TS = 5000. #10000
 
 def callback(lcl, _glb):
     # stop training if reward exceeds 199
