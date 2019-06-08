@@ -15,8 +15,8 @@ keys/
 /env
 
 # savers
-/save
-/save/*
+/baselines/save
+/baselines/save/*
 
 *.sublime-project
 *.sublime-workspace

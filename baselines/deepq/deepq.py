@@ -254,10 +254,20 @@ def learn(env,
         model_saved = False
 
         if tf.train.latest_checkpoint(td) is not None:
+            print('=========')
+            print('td')
+            
+            print('=========')
+            print('tf.train.latest_checkpoint(td) is not None:')
+            
             load_variables(model_file)
             logger.log('Loaded model from {}'.format(model_file))
             model_saved = True
         elif load_path is not None:
+            
+            print('=========')
+            print('load_path is not None:')
+
             load_variables(load_path)
             logger.log('Loaded model from {}'.format(load_path))
 
@@ -317,6 +327,8 @@ def learn(env,
             num_episodes = len(episode_rewards)
             if done and print_freq is not None and len(episode_rewards) % print_freq == 0:
                 
+                print('=========')
+                print('logger.record_tabular')
                 
                 logger.record_tabular("steps", t,custom_path=checkpoint_path)
                 logger.record_tabular("episodes", num_episodes,custom_path=checkpoint_path)

@@ -4,6 +4,8 @@ import numpy
 import tensorflow as tf
 from baselines import deepq
 import csv
+from baselines import logger
+
 
 # Hyperparams
 env_name = 'CartPole-v0'
@@ -53,6 +55,8 @@ def main():
             numpy.random.seed(seed)
             tf.set_random_seed(seed)
 
+            logger.configure(dir_to_save) #checkpoint_path
+            
             env = gym.make(env_name)
             env._max_episode_steps = MAX_TS
             
@@ -69,7 +73,6 @@ def main():
                 callback=callback,
                 checkpoint_freq=checkpoint_freq, #10000
                 checkpoint_path=dir_to_save,
-
             )
 
             print("Saving .pkl model to: ",path_to_save)
@@ -80,8 +83,6 @@ def main():
         # Save this run to csv  
         with open(os.path.join('save','results.csv'), 'a', newline='') as csvfile:
             
-            
-
             fieldnames = ['xp_id','env_name','network','seed','lr','buffer_size','exploration_fraction','exploration_final_eps',\
                           'print_freq','checkpoint_path',\
                          'TOTAL_TS','MAX_TS','EXPLORE_TS','MAX_NB_XPS']
