@@ -12,7 +12,7 @@ env_name = 'CartPole-v0'
 
 # TO MODIFY
 TOTAL_TS = 1000 #500000 # total nb of steps in the training process
-MAX_NB_XPS = 50 # max nb of xps to run
+MAX_NB_XPS = 10 # max nb of xps to run
 
 MAX_TS = 10000 # max nb of steps after which we stop learning
 EXPLORE_TS = 1000. 
@@ -43,7 +43,7 @@ def main():
         with tf.Session() as session:
 
             # Get xp_id
-            xp_id = strftime("%Y-%m-%d.%H:%M:%S", gmtime()) +"_"+env_name + "_" + str(alpha)
+            xp_id = strftime("%Y-%m-%d.%H:%M:%S", gmtime()) +"_env="+env_name + "_alpha=" + str(alpha)
             print('Experiment: '+xp_id)
 
             dir_to_save = os.path.join('.','save',xp_id)

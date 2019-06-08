@@ -18,6 +18,11 @@ keys/
 /baselines/save
 /baselines/save/*
 
+save/
+sbatch_logs/
+/save/
+/sbatch_logs/
+
 *.sublime-project
 *.sublime-workspace
 

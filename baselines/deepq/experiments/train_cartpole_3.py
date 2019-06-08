@@ -43,7 +43,7 @@ def main():
         with tf.Session() as session:
 
             # Get xp_id
-            xp_id = strftime("%Y-%m-%d.%H:%M:%S", gmtime()) +"_"+env_name + "_" + str(alpha)
+            xp_id = strftime("%Y-%m-%d.%H:%M:%S", gmtime()) +"_env="+env_name + "_alpha=" + str(alpha)
             print('Experiment: '+xp_id)
 
             dir_to_save = os.path.join('.','save',xp_id)
