@@ -97,12 +97,12 @@ def cnn_to_mlp(convs, hiddens, dueling=False, layer_norm=False):
 
 
 
-def build_q_func(network, hiddens=[256], dueling=True, layer_norm=False, **network_kwargs):
+def build_qv_func(network, hiddens=[256], dueling=True, layer_norm=False, **network_kwargs):
     if isinstance(network, str):
         from baselines.common.models import get_network_builder
         network = get_network_builder(network)(**network_kwargs)
 
-    def q_func_builder(input_placeholder, num_actions, scope, reuse=False):
+    def qv_func_builder(input_placeholder, num_actions, scope, reuse=False):
         with tf.variable_scope(scope, reuse=reuse):
             latent = network(input_placeholder)
             if isinstance(latent, tuple):
@@ -121,6 +121,16 @@ def build_q_func(network, hiddens=[256], dueling=True, layer_norm=False, **netwo
                     action_out = tf.nn.relu(action_out)
                 action_scores = layers.fully_connected(action_out, num_outputs=num_actions, activation_fn=None)
 
+            with tf.variable_scope("action_var"):
+                action_out = latent
+                for hidden in hiddens:
+                    action_out = layers.fully_connected(action_out, num_outputs=hidden, activation_fn=None)
+                    if layer_norm:
+                        action_out = layers.layer_norm(action_out, center=True, scale=True)
+                    action_out = tf.nn.relu(action_out)
+                action_scores = layers.fully_connected(action_out, num_outputs=num_actions, activation_fn=tf.exp)
+                v_out = action_scores
+
             if dueling:
                 with tf.variable_scope("state_value"):
                     state_out = latent
@@ -135,6 +145,14 @@ def build_q_func(network, hiddens=[256], dueling=True, layer_norm=False, **netwo
                 q_out = state_score + action_scores_centered
             else:
                 q_out = action_scores
-            return q_out
+            return q_out, v_out
 
-    return q_func_builder
+    return qv_func_builder
+
+def build_q_func(*args, **kwargs):
+    qv_func_builder = build_qv_func(*args, **kwargs)
+    return lambda *args, **kwargs: qv_func_builder(*args, **kwargs)[0]
+
+def build_v_func(*args, **kwargs):
+    qv_func_builder = build_qv_func(*args, **kwargs)
+    return lambda *args, **kwargs: qv_func_builder(*args, **kwargs)[1]

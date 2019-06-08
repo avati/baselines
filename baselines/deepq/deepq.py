@@ -17,7 +17,7 @@ from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 from baselines.deepq.utils import ObservationInput
 
 from baselines.common.tf_util import get_session
-from baselines.deepq.models import build_q_func
+from baselines.deepq.models import build_q_func, build_v_func
 
 
 class ActWrapper(object):
@@ -191,6 +191,7 @@ def learn(env,
     set_global_seeds(seed)
 
     q_func = build_q_func(network, **network_kwargs)
+    v_func = build_v_func(network, **network_kwargs)
 
     # capture the shape outside the closure so that the env object is not serialized
     # by cloudpickle when serializing make_obs_ph
@@ -202,6 +203,7 @@ def learn(env,
     act, train, update_target, debug = deepq.build_train(
         make_obs_ph=make_obs_ph,
         q_func=q_func,
+        v_func=v_func,
         num_actions=env.action_space.n,
         optimizer=tf.train.AdamOptimizer(learning_rate=lr),
         gamma=gamma,
