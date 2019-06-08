@@ -22,7 +22,7 @@ buffer_size = 50000
 exploration_final_eps = 0.02
 print_freq = 10
 checkpoint_freq = 10000
-lr = 1e-3
+lr = 1e-4
 
 alpha = 0.1
 

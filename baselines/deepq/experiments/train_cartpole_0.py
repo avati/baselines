@@ -11,7 +11,7 @@ from baselines import logger
 env_name = 'CartPole-v0'
 
 # TO MODIFY
-TOTAL_TS = 500000 #500000 # total nb of steps in the training process
+TOTAL_TS = 1000 #500000 # total nb of steps in the training process
 MAX_NB_XPS = 50 # max nb of xps to run
 
 MAX_TS = 10000 # max nb of steps after which we stop learning
@@ -24,7 +24,7 @@ print_freq = 10
 checkpoint_freq = 10000
 lr = 1e-4
 
-alpha = 0.
+alpha = 0.1
 
 # Sanity check
 assert EXPLORE_TS / MAX_TS == 0.1
