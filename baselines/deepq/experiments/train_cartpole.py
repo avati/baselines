@@ -6,12 +6,15 @@ import tensorflow
 
 from baselines import deepq
 
-MAX_TS = 50000 #100000
-EXPLORE_TS = 5000. #10000
+TOTAL_TS = 50000 #100000
+MAX_TS = 10000 #100000
+EXPLORE_TS = 1000. #10000
+
+assert EXPLORE_TS / MAX_TS == 0.1
 
 def callback(lcl, _glb):
     # stop training if reward exceeds 199
-    is_solved = lcl['t'] > 100 and sum(lcl['episode_rewards'][-101:-1]) / 100 >= 199
+    is_solved = lcl['t'] > 100 and sum(lcl['episode_rewards'][-101:-1]) / 100 >= MAX_TS
     return is_solved
 
 def main():
@@ -36,13 +39,13 @@ def main():
         network='mlp',
         seed = seed,
         lr=1e-3,
-        total_timesteps=MAX_TS, #100000
+        total_timesteps=TOTAL_TS, #100000
         buffer_size=50000,
         exploration_fraction=EXPLORE_TS/MAX_TS,
         exploration_final_eps=0.02,
-        print_freq=1,
+        print_freq=10,
         callback=callback,
-        checkpoint_freq=50, #10000
+        checkpoint_freq=1000, #10000
         checkpoint_path=dir_to_save,
         
     )
