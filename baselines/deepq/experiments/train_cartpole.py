@@ -2,7 +2,7 @@ import gym
 
 from baselines import deepq
 
-MAX_TS = 1000000
+MAX_TS = 100000
 EXPLORE_TS = 10000.
 
 def callback(lcl, _glb):
