@@ -69,7 +69,7 @@ def main():
                 callback=callback,
                 checkpoint_freq=checkpoint_freq, #10000
                 checkpoint_path=dir_to_save,
-
+                alpha=1.0
             )
 
             print("Saving .pkl model to: ",path_to_save)

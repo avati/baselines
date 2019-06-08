@@ -116,6 +116,7 @@ def learn(env,
           param_noise=False,
           callback=None,
           load_path=None,
+          alpha=0.0,
           **network_kwargs
             ):
     """Train a deepq model.
@@ -211,7 +212,8 @@ def learn(env,
         optimizer=tf.train.AdamOptimizer(learning_rate=lr),
         gamma=gamma,
         grad_norm_clipping=10,
-        param_noise=param_noise
+        param_noise=param_noise,
+        alpha=alpha
     )
 
     act_params = {

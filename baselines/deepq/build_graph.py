@@ -315,7 +315,7 @@ def build_act_with_param_noise(make_obs_ph, q_func, num_actions, scope="deepq", 
 
 
 def build_train(make_obs_ph, q_func, v_func, num_actions, optimizer, grad_norm_clipping=None, gamma=1.0,
-    double_q=True, scope="deepq", reuse=None, param_noise=False, param_noise_filter_func=None):
+    double_q=True, scope="deepq", reuse=None, param_noise=False, param_noise_filter_func=None, alpha=0.0):
     """Creates the train function:
 
     Parameters
@@ -423,7 +423,7 @@ def build_train(make_obs_ph, q_func, v_func, num_actions, optimizer, grad_norm_c
         # compute the error (potentially clipped)
         td_error = q_t_selected - tf.stop_gradient(q_t_selected_target)
         var_error = tf.stop_gradient(tf.abs(td_error)) - v_t_selected
-        errors = U.huber_loss(td_error) + U.huber_loss(var_error)
+        errors = U.huber_loss(td_error) + alpha * U.huber_loss(var_error)
         weighted_error = tf.reduce_mean(importance_weights_ph * errors)
 
         # compute optimization op (potentially with gradient clipping)
