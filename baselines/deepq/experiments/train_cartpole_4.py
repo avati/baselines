@@ -24,7 +24,7 @@ print_freq = 10
 checkpoint_freq = 10000
 lr = 1e-3
 
-alpha = 0.
+alpha = 1.
 
 # Sanity check
 assert EXPLORE_TS / MAX_TS == 0.1
