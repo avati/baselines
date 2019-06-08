@@ -421,9 +421,23 @@ def build_train(make_obs_ph, q_func, v_func, num_actions, optimizer, grad_norm_c
         q_t_selected_target = rew_t_ph + gamma * q_tp1_best_masked
 
         # compute the error (potentially clipped)
+        def loss(q, t, v, alpha):
+            if type(alpha) == int or type(alpha) == float:
+                d = q - tf.stop_gradient(t)
+                var_error = tf.stop_gradient(tf.abs(d)) - v
+                errors = U.huber_loss(d) + alpha * U.huber_loss(var_error)
+            elif alpha.upper() == 'MLE':
+                errors = tf.square(q - tf.stop_gradient(t)) / v + tf.log(v)
+            elif alpha.upper() == 'CRPS':
+                print('CRPS Not Yet Implemented')
+                errors = None
+            else:
+                print('Unknown loss!!')
+                return None
+            return errors
+
         td_error = q_t_selected - tf.stop_gradient(q_t_selected_target)
-        var_error = tf.stop_gradient(tf.abs(td_error)) - v_t_selected
-        errors = U.huber_loss(td_error) + alpha * U.huber_loss(var_error)
+        errors = loss(q_t_selected, q_t_selected_target, v_t_selected, alpha)
         weighted_error = tf.reduce_mean(importance_weights_ph * errors)
 
         # compute optimization op (potentially with gradient clipping)
