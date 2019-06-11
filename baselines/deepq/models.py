@@ -103,7 +103,16 @@ def build_qv_func(network, hiddens=[256], dueling=True, layer_norm=False, **netw
         network = get_network_builder(network)(**network_kwargs)
 
     def qv_func_builder(input_placeholder, num_actions, scope, reuse=False):
+        
+        print('reuse',reuse)
+        
         with tf.variable_scope(scope, reuse=reuse):
+            
+            print('input_placeholder',input_placeholder)
+            print('network',network)
+            
+            print('=== Step 9: before network: ',len(tf.trainable_variables()), tf.trainable_variables())
+            
             latent = network(input_placeholder)
             if isinstance(latent, tuple):
                 if latent[1] is not None:
@@ -112,6 +121,10 @@ def build_qv_func(network, hiddens=[256], dueling=True, layer_norm=False, **netw
 
             latent = layers.flatten(latent)
 
+            print('=== Step 10: after network: ',len(tf.trainable_variables()), tf.trainable_variables())
+
+            print('hiddens',hiddens)
+            
             with tf.variable_scope("action_value"):
                 action_out = latent
                 for hidden in hiddens:
@@ -121,6 +134,8 @@ def build_qv_func(network, hiddens=[256], dueling=True, layer_norm=False, **netw
                     action_out = tf.nn.relu(action_out)
                 action_scores = layers.fully_connected(action_out, num_outputs=num_actions, activation_fn=None)
 
+            print('=== Step 11: after action_value: ',len(tf.trainable_variables()), tf.trainable_variables())
+
             with tf.variable_scope("action_var"):
                 action_out = latent
                 for hidden in hiddens:
@@ -129,6 +144,8 @@ def build_qv_func(network, hiddens=[256], dueling=True, layer_norm=False, **netw
                         action_out = layers.layer_norm(action_out, center=True, scale=True)
                     action_out = tf.nn.relu(action_out)
                 v_out = layers.fully_connected(action_out, num_outputs=num_actions, activation_fn=tf.exp)
+
+            print('=== Step 12: after action_var: ',len(tf.trainable_variables()), tf.trainable_variables())
 
             if dueling:
                 with tf.variable_scope("state_value"):
@@ -142,6 +159,8 @@ def build_qv_func(network, hiddens=[256], dueling=True, layer_norm=False, **netw
                 action_scores_mean = tf.reduce_mean(action_scores, 1)
                 action_scores_centered = action_scores - tf.expand_dims(action_scores_mean, 1)
                 q_out = state_score + action_scores_centered
+                print('=== Step 13: after dueling state_value: ',len(tf.trainable_variables()), tf.trainable_variables())
+
             else:
                 q_out = action_scores
             return q_out, v_out
@@ -149,9 +168,13 @@ def build_qv_func(network, hiddens=[256], dueling=True, layer_norm=False, **netw
     return qv_func_builder
 
 def build_q_func(*args, **kwargs):
+    print('=== Step 1: ',len(tf.trainable_variables()), tf.trainable_variables())
     qv_func_builder = build_qv_func(*args, **kwargs)
+    print('=== Step 2: ',len(tf.trainable_variables()), tf.trainable_variables())
     return lambda *args, **kwargs: qv_func_builder(*args, **kwargs)[0]
 
 def build_v_func(*args, **kwargs):
+    print('=== Step 4: ',len(tf.trainable_variables()), tf.trainable_variables())
     qv_func_builder = build_qv_func(*args, **kwargs)
+    print('=== Step 5: ',len(tf.trainable_variables()), tf.trainable_variables())
     return lambda *args, **kwargs: qv_func_builder(*args, **kwargs)[1]

@@ -379,11 +379,24 @@ def build_train(make_obs_ph, q_func, v_func, num_actions, optimizer, grad_norm_c
     debug: {str: function}
         a bunch of functions to print debug data like q_values.
     """
+    
+    print('scope',scope)
+    print('reuse',reuse)
+    
+    print('=== Step 7: ',len(tf.trainable_variables()), tf.trainable_variables())
+
     if param_noise:
+        print('a')
         act_f = build_act_with_param_noise(make_obs_ph, q_func, num_actions, scope=scope, reuse=reuse,
             param_noise_filter_func=param_noise_filter_func)
     else:
+        print('b')
         act_f = build_act(make_obs_ph, q_func, num_actions, scope=scope, reuse=reuse)
+
+        
+    print('=== Step 14: ',len(tf.trainable_variables()), tf.trainable_variables())
+
+        
 
     with tf.variable_scope(scope, reuse=reuse):
         # set up placeholders
@@ -394,19 +407,28 @@ def build_train(make_obs_ph, q_func, v_func, num_actions, optimizer, grad_norm_c
         done_mask_ph = tf.placeholder(tf.float32, [None], name="done")
         importance_weights_ph = tf.placeholder(tf.float32, [None], name="weight")
 
+        print('=== Step 15: ',len(tf.trainable_variables()), tf.trainable_variables())
+
         # q network evaluation
         q_t = q_func(obs_t_input.get(), num_actions, scope="q_func", reuse=True)  # reuse parameters from act
+        print('=== Step 16: ',len(tf.trainable_variables()), tf.trainable_variables())
         v_t = v_func(obs_t_input.get(), num_actions, scope="q_func", reuse=True)  # reuse parameters from act
+        print('=== Step 17: ',len(tf.trainable_variables()), tf.trainable_variables())
         q_func_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=tf.get_variable_scope().name + "/q_func")
+        print('=== Step 18: ',len(tf.trainable_variables()), tf.trainable_variables())
 
         # target q network evalution
         q_tp1 = q_func(obs_tp1_input.get(), num_actions, scope="target_q_func")
+        print('=== Step 19: ',len(tf.trainable_variables()), tf.trainable_variables())
         target_q_func_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=tf.get_variable_scope().name + "/target_q_func")
+        print('=== Step 20: ',len(tf.trainable_variables()), tf.trainable_variables())
 
         # q scores for actions which we know were selected in the given state.
         q_t_selected = tf.reduce_sum(q_t * tf.one_hot(act_t_ph, num_actions), 1)
         # variances of q scores for actions which we know were selected in the given state.
         v_t_selected = tf.reduce_sum(v_t * tf.one_hot(act_t_ph, num_actions), 1)
+
+        print('=== Step 21: ',len(tf.trainable_variables()), tf.trainable_variables())
 
         # compute estimate of best possible value starting from state at t + 1
         if double_q:
@@ -428,6 +450,12 @@ def build_train(make_obs_ph, q_func, v_func, num_actions, optimizer, grad_norm_c
                 errors = U.huber_loss(d) + alpha * U.huber_loss(var_error)
             elif alpha.upper() == 'MLE':
                 errors = tf.square(q - tf.stop_gradient(t)) / v + tf.log(v)
+                
+            elif alpha.upper() == 'MAXIMESTOP':
+                d = q - tf.stop_gradient(t)
+                var_error = tf.stop_gradient(tf.abs(d)) - v
+                errors = (U.huber_loss(d) / tf.stop_gradient(v)) + 1. * U.huber_loss(var_error)
+
             elif alpha.upper() == 'CRPS':
                 print('CRPS Not Yet Implemented')
                 errors = None
@@ -439,6 +467,10 @@ def build_train(make_obs_ph, q_func, v_func, num_actions, optimizer, grad_norm_c
         td_error = q_t_selected - tf.stop_gradient(q_t_selected_target)
         errors = loss(q_t_selected, q_t_selected_target, v_t_selected, alpha)
         weighted_error = tf.reduce_mean(importance_weights_ph * errors)
+
+        print('=== Step 22: ',len(tf.trainable_variables()), tf.trainable_variables())
+
+        
 
         # compute optimization op (potentially with gradient clipping)
         if grad_norm_clipping is not None:
@@ -457,6 +489,9 @@ def build_train(make_obs_ph, q_func, v_func, num_actions, optimizer, grad_norm_c
             update_target_expr.append(var_target.assign(var))
         update_target_expr = tf.group(*update_target_expr)
 
+        print('=== Step 23: ',len(tf.trainable_variables()), tf.trainable_variables())
+
+
         # Create callable functions
         train = U.function(
             inputs=[
@@ -473,5 +508,7 @@ def build_train(make_obs_ph, q_func, v_func, num_actions, optimizer, grad_norm_c
         update_target = U.function([], [], updates=[update_target_expr])
 
         q_values = U.function([obs_t_input], q_t)
+
+        print('=== Step 24: ',len(tf.trainable_variables()), tf.trainable_variables())
 
         return act_f, train, update_target, {'q_values': q_values}

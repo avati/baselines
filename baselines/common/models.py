@@ -233,12 +233,27 @@ def conv_only(convs=[(32, 8, 4), (64, 4, 2), (64, 3, 1)], **conv_kwargs):
     function that takes tensorflow tensor as input and returns the output of the last convolutional layer
 
     '''
-
+    
+    print('=============')
+    print('=============')
+    print('=============')
+    print('=============')
+    print('=============')
+    print('=============')
+    print('=============')
+    print('=============')
+    print('=============')
+    print('=============')
+    print('begin create conv_only network')
+    print('convs', convs)
+    
+    print('====== begin conv only =====')
     def network_fn(X):
         out = tf.cast(X, tf.float32) / 255.
         with tf.variable_scope("convnet"):
             for num_outputs, kernel_size, stride in convs:
-                out = tf.contrib.layers.convolution2d(out,
+                
+                out = tf.contrib.layers.conv2d(out,
                                            num_outputs=num_outputs,
                                            kernel_size=kernel_size,
                                            stride=stride,

@@ -194,8 +194,19 @@ def learn(env,
     np.random.seed(seed)
     tf.set_random_seed(seed)
 
-    q_func = build_q_func(network, **network_kwargs)
+    print('=== Step 0: ',len(tf.trainable_variables()), tf.trainable_variables())
+    print('network',network)
+    print('network_kwargs',network_kwargs)
+    q_func = build_q_func(network, **network_kwargs) # idea: call 1 build_qv_func and return both at the same time? 
+    
+    print('=== Step 3: ',len(tf.trainable_variables()), tf.trainable_variables())
     v_func = build_v_func(network, **network_kwargs)
+    
+    print('=== Step 6: ',len(tf.trainable_variables()), tf.trainable_variables())
+    print('q_func',q_func)
+    print('v_func',v_func)
+
+
 
     # capture the shape outside the closure so that the env object is not serialized
     # by cloudpickle when serializing make_obs_ph
@@ -215,6 +226,10 @@ def learn(env,
         param_noise=param_noise,
         alpha=alpha
     )
+    
+    print('=== Step 25: ',len(tf.trainable_variables()), tf.trainable_variables())
+    
+
 
     act_params = {
         'make_obs_ph': make_obs_ph,
@@ -226,6 +241,7 @@ def learn(env,
 
     # Create the replay buffer
     if prioritized_replay:
+        print('prioritized_replay is on')
         replay_buffer = PrioritizedReplayBuffer(buffer_size, alpha=prioritized_replay_alpha)
         if prioritized_replay_beta_iters is None:
             prioritized_replay_beta_iters = total_timesteps
@@ -233,12 +249,14 @@ def learn(env,
                                        initial_p=prioritized_replay_beta0,
                                        final_p=1.0)
     else:
+        print('prioritized_replay is off')
         replay_buffer = ReplayBuffer(buffer_size)
         beta_schedule = None
     # Create the schedule for exploration starting from 1.
     exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
                                  initial_p=1.0,
                                  final_p=exploration_final_eps)
+
 
     # Initialize the parameters and copy them to the target network.
     U.initialize()
@@ -248,6 +266,8 @@ def learn(env,
     saved_mean_reward = None
     obs = env.reset()
     reset = True
+
+    print('=== Step 26: ',len(tf.trainable_variables()), tf.trainable_variables())
 
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
@@ -358,6 +378,9 @@ def learn(env,
                     save_variables(model_file)
                     model_saved = True
                     saved_mean_reward = mean_100ep_reward
+                    
+        print('=== Step 27: ',len(tf.trainable_variables()), tf.trainable_variables())
+
         if model_saved:
             if print_freq is not None:
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
